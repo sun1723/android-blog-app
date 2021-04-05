@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">My Application</string>
+    <string name="text_input">Title</string>
+    <string name="select_button">Select Image</string>
+    <string name="upload_button">Upload Image</string>
+    <string name="submit_button">Submit</string>
+    <string name="delete_button">Delete</string>
+</resources>
