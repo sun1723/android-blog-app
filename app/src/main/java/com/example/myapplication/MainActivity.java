@@ -280,7 +280,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             post.setImagePath(imagePath);
             databaseReference.push().setValue(post);
             imageView.setImageDrawable(null);
+            editText.setText(null);
 
+        }
+        else if(i_d == R.id.add_button)
+        {
+            setContentView(R.layout.edit_page);
         }
     }
 
