@@ -1,30 +1,160 @@
 package com.example.myapplication;
 
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
-public class MainActivity2 extends AppCompatActivity {
+import java.io.FileNotFoundException;
 
+public class MainActivity2 extends AppCompatActivity implements View.OnClickListener{
+    RecyclerView recyclerView;
+    private LinearLayout linearLayout2;
+    Button addbutton;
+    private ImageView imageView;
+    DatabaseReference databaseReference;
+    FirebaseStorage storage;
+
+    StorageReference storageref;
+
+    Query query1;
+
+    FirebaseRecyclerAdapter<Post, MainActivity2.BlogViewHolder> firebaseRecyclerAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main2);
-        BottomNavigationView navView = findViewById(R.id.nav_view);
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
-        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications)
-                .build();
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
-        NavigationUI.setupWithNavController(navView, navController);
+        setContentView(R.layout.activity_main);
+
+        linearLayout2 = findViewById(R.id.linear_layout2);
+        addbutton = findViewById(R.id.add_button);
+        recyclerView = linearLayout2.findViewById(R.id.recycler1);
+        storage =FirebaseStorage.getInstance();
+        storageref = storage.getReference();
+
+        addbutton.setOnClickListener(this);
+
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        query1 = FirebaseDatabase.getInstance().getReference("Post");
+        FirebaseRecyclerOptions<Post> options = new FirebaseRecyclerOptions.Builder<Post>()
+                .setQuery(query1,Post.class).build();
+//        Log.d("Options","data: "+ options);
+
+        firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<Post, MainActivity2.BlogViewHolder>(options)
+        {
+            @NonNull
+            @Override
+            public MainActivity2.BlogViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                View view = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.post,parent,false);
+                return new MainActivity2.BlogViewHolder(view);
+            }
+
+            @Override
+            protected void onBindViewHolder(@NonNull MainActivity2.BlogViewHolder holder, int position, @NonNull Post postp) {
+                holder.settext(postp.getEdittext());
+                try {
+                    holder.setimage(postp.getImagePath());
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+
+                View.OnClickListener onclicklistener = new View.OnClickListener()
+                {
+
+                    @Override
+                    public void onClick(View v) {
+                        //debug:
+//                                        Toast.makeText(getApplicationContext(), String.valueOf(position), Toast.LENGTH_LONG).show();
+                        getRef(position).removeValue();
+                        firebaseRecyclerAdapter.notifyItemRemoved(position);
+                    }
+                };
+                holder.button.setOnClickListener(onclicklistener);
+            }
+        };
+
+        firebaseRecyclerAdapter.startListening();
+        LinearLayoutManager LayoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(LayoutManager);
+        recyclerView.setAdapter(firebaseRecyclerAdapter);
+    }
+
+    @Override
+    public void onClick(View v) {
+        int i_d = v.getId();
+        if(i_d == R.id.add_button)
+        {
+            Intent i = new Intent(this, MainActivity.class);
+            startActivity(i);
+        }
+    }
+
+    public class BlogViewHolder extends RecyclerView.ViewHolder  {
+        private static final long MEGABYTE = 1024 * 1024 * 5 ;
+        Button button;
+        View mView;
+        public BlogViewHolder(@NonNull View itemView) {
+            super(itemView);
+            mView = itemView;
+            button = (Button)mView.findViewById(R.id.delete_button);
+        }
+        public void settext (String text)
+        {
+            TextView etext = (TextView)mView.findViewById(R.id.text);
+            etext.setText(text);
+        }
+        public void setimage (String imagepath) throws FileNotFoundException {
+//            Toast.makeText(MainActivity.this,"path: "+imagepath,Toast.LENGTH_LONG).show();
+            Uri selectedImage = Uri.parse(imagepath);
+//            Toast.makeText(MainActivity.this,"uri: "+ selectedImage,Toast.LENGTH_LONG).show();
+            StorageReference imagevRef = storageref.child("images/" + imagepath);
+            ImageView image = (ImageView)mView.findViewById(R.id.image_View);
+            imagevRef.getBytes(MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                @Override
+                public void onSuccess(byte[] bytes) {
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
+                    image.setImageBitmap(bitmap);
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(MainActivity2.this,"download image failed",Toast.LENGTH_LONG).show();
+                }
+            });
+//            Picasso.with(MainActivity.this).load(String.valueOf(imagevRef.getDownloadUrl())).override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL).into(image);
+//            image.setImageBitmap(BitmapFactory.decodeStream(getContentResolver().openInputStream(selectedImage)));
+//            Picasso.get().load( imagepath).into(image);
+//            image.setImageURI(Uri.fromFile(new File(imagepath)));
+//            ImageLoader imageLoader = ImageLoader.getInstance();
+//            imageLoader.displayImage(selectedImage.toString(),image);
+        }
+    }
 }

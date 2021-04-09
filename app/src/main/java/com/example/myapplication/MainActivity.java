@@ -12,11 +12,8 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -27,17 +24,13 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -53,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button selectButton,uploadButton,submitButton,deleteButton;
     private TextInputEditText editText;
     private TextInputLayout textInputLayout;
-    private LinearLayout linearLayout1, linearLayout2;
+    private LinearLayout linearLayout1;
     private TextInputLayout textfield;
     private TextView textView;
     private ListView listView;
@@ -61,10 +54,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ImageView imageView;
     private String imagePath;
 //    private ImageView imageView;
-    RecyclerView recyclerView;
 
-    Query query1;
-    FirebaseRecyclerAdapter<Post, BlogViewHolder> firebaseRecyclerAdapter;
+
+
+
     private ArrayList<String> list = new ArrayList<String>();
     private ArrayList<String> keylist = new ArrayList<String>();
 //    FirebaseRecyclerAdapter<Post,BlogViewHolder> firebaseRecyclerAdapter;
@@ -83,19 +76,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.edit_page);
 
 
         //initializing edittext and buttons
         linearLayout1 = findViewById(R.id.linear_layout1);
-        linearLayout2 = findViewById(R.id.linear_layout2);
+
         textfield = findViewById(R.id.textField);
         editText =linearLayout1.findViewById(R.id.edit_Text);
         selectButton = linearLayout1.findViewById(R.id.select_button);
         uploadButton = linearLayout1.findViewById(R.id.upload_button);
         submitButton = linearLayout1.findViewById(R.id.submit_button);
-        recyclerView = linearLayout2.findViewById(R.id.recycler1);
-//        linearLayout = findViewById(R.id.linear_layout);
+
         imageView = linearLayout1.findViewById(R.id.image_view);
 
 
@@ -151,92 +143,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onStart() {
         super.onStart();
-        query1 = FirebaseDatabase.getInstance().getReference("Post");
-        FirebaseRecyclerOptions<Post> options = new FirebaseRecyclerOptions.Builder<Post>()
-                                                .setQuery(query1,Post.class).build();
-        Log.d("Options","data: "+ options);
 
-        firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<Post,BlogViewHolder>(options)
-            {
-                @NonNull
-                @Override
-                public BlogViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                    View view = LayoutInflater.from(parent.getContext())
-                                .inflate(R.layout.post,parent,false);
-                    return new BlogViewHolder(view);
-                }
 
-                @Override
-                protected void onBindViewHolder(@NonNull BlogViewHolder holder, int position, @NonNull Post postp) {
-                    holder.settext(postp.getEdittext());
-                    try {
-                        holder.setimage(postp.getImagePath());
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    }
 
-                    View.OnClickListener onclicklistener = new View.OnClickListener()
-                    {
 
-                        @Override
-                        public void onClick(View v) {
-                            //debug:
-//                                        Toast.makeText(getApplicationContext(), String.valueOf(position), Toast.LENGTH_LONG).show();
-                            getRef(position).removeValue();
-                            firebaseRecyclerAdapter.notifyItemRemoved(position);
-                        }
-                    };
-                    holder.button.setOnClickListener(onclicklistener);
-                }
-            };
-
-            firebaseRecyclerAdapter.startListening();
-            LinearLayoutManager LayoutManager = new LinearLayoutManager(this);
-            recyclerView.setLayoutManager(LayoutManager);
-            recyclerView.setAdapter(firebaseRecyclerAdapter);
-//          recyclerView.setLayoutManager(mLayoutManager);
 
     }
-    public class BlogViewHolder extends RecyclerView.ViewHolder  {
-        private static final long MEGABYTE = 1024 * 1024 * 5 ;
-        Button button;
-        View mView;
-        public BlogViewHolder(@NonNull View itemView) {
-            super(itemView);
-            mView = itemView;
-            button = (Button)mView.findViewById(R.id.delete_button);
-        }
-        public void settext (String text)
-        {
-            TextView etext = (TextView)mView.findViewById(R.id.text);
-            etext.setText(text);
-        }
-        public void setimage (String imagepath) throws FileNotFoundException {
-//            Toast.makeText(MainActivity.this,"path: "+imagepath,Toast.LENGTH_LONG).show();
-            Uri selectedImage = Uri.parse(imagepath);
-//            Toast.makeText(MainActivity.this,"uri: "+ selectedImage,Toast.LENGTH_LONG).show();
-            StorageReference imagevRef = storageref.child("images/" + imagepath);
-            ImageView image = (ImageView)mView.findViewById(R.id.image_View);
-            imagevRef.getBytes(MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                @Override
-                public void onSuccess(byte[] bytes) {
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
-                    image.setImageBitmap(bitmap);
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Toast.makeText(MainActivity.this,"download image failed",Toast.LENGTH_LONG).show();
-                }
-            });
-//            Picasso.with(MainActivity.this).load(String.valueOf(imagevRef.getDownloadUrl())).override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL).into(image);
-//            image.setImageBitmap(BitmapFactory.decodeStream(getContentResolver().openInputStream(selectedImage)));
-//            Picasso.get().load( imagepath).into(image);
-//            image.setImageURI(Uri.fromFile(new File(imagepath)));
-//            ImageLoader imageLoader = ImageLoader.getInstance();
-//            imageLoader.displayImage(selectedImage.toString(),image);
-        }
-    }
+
 
     @Override
     public void onClick(View view) {
@@ -283,10 +196,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             editText.setText(null);
 
         }
-        else if(i_d == R.id.add_button)
-        {
-            setContentView(R.layout.edit_page);
-        }
+
+
     }
 
     private void openDialog() {

@@ -6,7 +6,7 @@
     <string name="submit_button">Submit</string>
     <string name="delete_button">Delete</string>
     <string name="page_title">My post</string>
-    <string name="title_activity_main2">MainActivity</string>
+    <string name="title_activity_main2">MainActivity2</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
