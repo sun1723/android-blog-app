@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -23,6 +24,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NavUtils;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -90,6 +92,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         imageView = linearLayout1.findViewById(R.id.image_view);
 
+        //action bar
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle("Post Page");
 
         //create Post object
         post = new Post();
@@ -144,12 +149,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onStart() {
         super.onStart();
 
-
-
-
-
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                Intent i = new Intent(this,MainActivity2.class);
+                NavUtils.navigateUpTo(this,i);
+                return true;
+            default:
+                throw new IllegalStateException("Unexpected value: " + item.getItemId());
+        }
+
+    }
 
     @Override
     public void onClick(View view) {
