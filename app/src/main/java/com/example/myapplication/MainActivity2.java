@@ -55,6 +55,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
         storage =FirebaseStorage.getInstance();
         storageref = storage.getReference();
 
+        setSupportActionBar(findViewById(R.id.appbar));
         addbutton.setOnClickListener(this);
 
     }

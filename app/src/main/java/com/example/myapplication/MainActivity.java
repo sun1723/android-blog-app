@@ -93,6 +93,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         imageView = linearLayout1.findViewById(R.id.image_view);
 
         //action bar
+        setSupportActionBar(findViewById(R.id.edit_bar));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Post Page");
 
