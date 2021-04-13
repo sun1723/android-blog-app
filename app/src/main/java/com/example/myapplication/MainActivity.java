@@ -226,7 +226,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 switch (which) {
                     case 0:
                         //Toast.makeText(MainActivity.this,"click on photo galary",Toast.LENGTH_LONG).show();
-                        openGallery();
+//                        openGallery();
+                        Intent i = new Intent(MainActivity.this,ImgActivity.class);
+                        startActivity(i);
                         break;
                     case 1:
                         Toast.makeText(MainActivity.this,"click on camera",Toast.LENGTH_LONG).show();
