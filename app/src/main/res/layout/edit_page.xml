@@ -89,6 +89,13 @@
                 android:contentDescription=""
                 android:maxHeight="200dp"
                 tools:srcCompat="@tools:sample/avatars" />
+            <EditText
+                android:id="@+id/article"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:inputType="text|textMultiLine"
+                android:autofillHints="something happened today"
+                android:gravity="top"/>
 
             <Button
                 android:id="@+id/submit_button"

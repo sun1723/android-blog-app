@@ -4,11 +4,13 @@ public class Post {
     private String edittext;
     private Boolean isDelete;
     private String imagePath;
+    private String article;
 
     public Post() {
         edittext = "";
         isDelete=false;
         imagePath = "";
+        article = "";
     }
 
     public String getEdittext() {
@@ -30,4 +32,10 @@ public class Post {
     }
 
     public String getImagePath() {return imagePath; };
+    public void setArticle(String article){
+        this.article = article;
+    }
+    public String getArticle(){
+        return this.article;
+    }
 }

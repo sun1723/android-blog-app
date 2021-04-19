@@ -52,7 +52,14 @@
                 android:contentDescription=""
                 android:layout_marginVertical="8dp"
                 tools:srcCompat="@tools:sample/backgrounds/scenic" />
-
+            <Button
+                android:id="@+id/readmore_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Read More "
+                android:backgroundTint="@color/white"
+                android:layout_marginHorizontal="8dp"
+                android:textColor="@color/black"/>
             <Button
                 android:id="@+id/delete_button"
                 android:layout_width="wrap_content"

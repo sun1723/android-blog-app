@@ -94,11 +94,22 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
                     public void onClick(View v) {
                         //debug:
 //                                        Toast.makeText(getApplicationContext(), String.valueOf(position), Toast.LENGTH_LONG).show();
-                        getRef(position).removeValue();
-                        firebaseRecyclerAdapter.notifyItemRemoved(position);
+                       int id = v.getId();
+                       if(id == R.id.delete_button) {
+                           getRef(position).removeValue();
+                           firebaseRecyclerAdapter.notifyItemRemoved(position);
+                       }
+                       else if(id == R.id.readmore_btn){
+                           Intent i = new Intent(getApplicationContext(), PostDetail.class);
+
+                           i.putExtra("title",postp.getEdittext());
+                           i.putExtra("post_key",getRef(position).getKey());
+                           startActivity(i);
+                       }
                     }
                 };
-                holder.button.setOnClickListener(onclicklistener);
+                holder.dele_button.setOnClickListener(onclicklistener);
+                holder.readmore_btn.setOnClickListener(onclicklistener);
             }
         };
 
@@ -114,19 +125,23 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
         if(i_d == R.id.add_button)
         {
             Intent i = new Intent(this, MainActivity.class);
+
             startActivity(i);
         }
     }
 
     public class BlogViewHolder extends RecyclerView.ViewHolder  {
         private static final long MEGABYTE = 1024 * 1024 * 5 ;
-        Button button;
+        Button dele_button;
+        Button readmore_btn;
         View mView;
         public BlogViewHolder(@NonNull View itemView) {
             super(itemView);
             mView = itemView;
-            button = (Button)mView.findViewById(R.id.delete_button);
+            dele_button = (Button)mView.findViewById(R.id.delete_button);
+            readmore_btn= (Button)mView.findViewById(R.id.readmore_btn);
         }
+
         public void settext (String text)
         {
             TextView etext = (TextView)mView.findViewById(R.id.text);

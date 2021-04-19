@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextInputLayout textInputLayout;
     private LinearLayout linearLayout1;
     private TextInputLayout textfield;
-    private TextView textView;
+    private TextView textView,contentView;
     private ListView listView;
     private Button buttonView;
     private ImageView imageView;
@@ -87,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         textfield = findViewById(R.id.textField);
         editText =linearLayout1.findViewById(R.id.edit_Text);
+        contentView = linearLayout1.findViewById(R.id.article);
         selectButton = linearLayout1.findViewById(R.id.select_button);
         uploadButton = linearLayout1.findViewById(R.id.upload_button);
         submitButton = linearLayout1.findViewById(R.id.submit_button);
@@ -114,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 boolean res = true;
-                if (imageView.getDrawable() == null || editText.getText().length() ==0) {
+                if (imageView.getDrawable() == null || editText.getText().length() ==0 || contentView.getText().length()==0) {
                     submitButton.setEnabled(false);
                 } else {
                     submitButton.setEnabled(true);
@@ -211,9 +212,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             //Toast.makeText(this, "submit_button is clicked", Toast.LENGTH_SHORT).show();
             post.setEdittext(editText.getText().toString().trim());
             post.setImagePath(imagePath);
+            post.setArticle(contentView.getText().toString().trim());
             databaseReference.push().setValue(post);
             imageView.setImageDrawable(null);
             editText.setText(null);
+            contentView.setText(null);
 
         }
 
