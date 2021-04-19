@@ -82,7 +82,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
             protected void onBindViewHolder(@NonNull MainActivity2.BlogViewHolder holder, int position, @NonNull Post postp) {
                 holder.settext(postp.getEdittext());
                 try {
-                    holder.setimage(postp.getImagePath());
+                    holder.setimage(postp.getEdittext());
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }

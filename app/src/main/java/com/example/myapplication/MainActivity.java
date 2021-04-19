@@ -1,15 +1,14 @@
 package com.example.myapplication;
 
+import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.MenuItem;
@@ -25,6 +24,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NavUtils;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -38,8 +38,6 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -55,6 +53,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button buttonView;
     private ImageView imageView;
     private String imagePath;
+    private static final int CAMERA_REQUEST = 1888;
+    private static final int MY_CAMERA_PERMISSION_CODE = 100;
+    ArrayList<ImgItem> image_list ;
 //    private ImageView imageView;
 
 
@@ -65,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //    FirebaseRecyclerAdapter<Post,BlogViewHolder> firebaseRecyclerAdapter;
     LinearLayoutManager mLayoutManager;
     //upload image
-    private static final int PICK_IMAGE = 1;
+
 //    private static int count ;
     //variable for firebase database
     FirebaseDatabase firebaseDatabase;
@@ -177,13 +178,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         else if (i_d == R.id.upload_button)
         {
 
-            imageRef = storageref.child("images/" + imagePath);
+            imageRef = storageref.child("images/" + editText.getText().toString());
             Bitmap bitmap = ((BitmapDrawable)imageView.getDrawable()).getBitmap();
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.JPEG,100,baos);
             byte[] data = baos.toByteArray();
 
             UploadTask uploadTask = imageRef.putBytes(data);
+
+//            ImgItem it = new ImgItem(imagePath,Integer.parseInt(String.valueOf(imageRef.getDownloadUrl())));
+//            image_list.add(it);
             uploadTask.addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
@@ -192,6 +196,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }).addOnSuccessListener(new OnSuccessListener() {
                 @Override
                 public void onSuccess(Object o) {
+
                     Toast.makeText(MainActivity.this,"upload successfully",Toast.LENGTH_LONG).show();
 //                    DatabaseReference imagestore = FirebaseDatabase.getInstance().getReference().child("image");
 //                    
@@ -228,13 +233,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         //Toast.makeText(MainActivity.this,"click on photo galary",Toast.LENGTH_LONG).show();
 //                        openGallery();
                         Intent i = new Intent(MainActivity.this,ImgActivity.class);
+                        i.putExtra("imgitem",image_list);
                         startActivity(i);
                         break;
                     case 1:
-                        Toast.makeText(MainActivity.this,"click on camera",Toast.LENGTH_LONG).show();
+//                        Toast.makeText(MainActivity.this,"click on camera",Toast.LENGTH_LONG).show();
+                        if (ContextCompat.checkSelfPermission(MainActivity.this,Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED)
+                        {
+                            requestPermissions(new String[]{Manifest.permission.CAMERA}, MY_CAMERA_PERMISSION_CODE);
+                        }
+                        else
+                        {
+                            Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                            startActivityForResult(cameraIntent, CAMERA_REQUEST);
+                        }
                         break;
                 }
+
             }
+
         });
         AlertDialog alert = alertDialog.create();
         alert.setCanceledOnTouchOutside(true);
@@ -243,32 +260,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private void openGallery() {
-//        Bundle options = new Bundle();
-        Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
-        startActivityForResult(gallery, PICK_IMAGE);
-
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
+    {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == MY_CAMERA_PERMISSION_CODE)
+        {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
+            {
+                Toast.makeText(this, "camera permission granted", Toast.LENGTH_LONG).show();
+                Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(cameraIntent, CAMERA_REQUEST);
+            }
+            else
+            {
+                Toast.makeText(this, "camera permission denied", Toast.LENGTH_LONG).show();
+            }
+        }
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK && null != data) {
-            Uri selectedImage = data.getData();
-
-            String[] filePathColumn = { MediaStore.Images.Media.DATA };
-            Cursor cursor = getContentResolver().query(selectedImage,filePathColumn, null, null, null);
-            cursor.moveToFirst();
-            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-            String picturePath = cursor.getString(columnIndex);
-            Uri file = Uri.fromFile(new File(picturePath));
-            imagePath = file.getLastPathSegment().toString();
-//            Toast.makeText(this,picturePath,Toast.LENGTH_LONG).show();
-            cursor.close();
-            try {
-                imageView.setImageBitmap(BitmapFactory.decodeStream(getContentResolver().openInputStream(selectedImage)));
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
+        if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
+            Bitmap photo = (Bitmap) data.getExtras().get("data");
+            imageView.setImageBitmap(photo);
         }
     }
 
