@@ -18,7 +18,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.MyApplication.NoActionBar">
+        android:theme="@style/Theme.MyApplication.NoActionBar"
+        android:requestLegacyExternalStorage="true">
         <activity android:name=".PostDetail"></activity>
         <activity android:name=".ImgActivity" />
         <activity
@@ -32,5 +33,6 @@
             </intent-filter>
         </activity>
     </application>
+
 
 </manifest>

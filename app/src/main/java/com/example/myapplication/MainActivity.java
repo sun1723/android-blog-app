@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.MenuItem;
@@ -38,6 +39,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -104,6 +106,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //create intent object
         Intent intent = new Intent();
+
+        image_list = ImgItem.createImgList();
 
         //get instance of the firebase database
         firebaseDatabase = FirebaseDatabase.getInstance();
@@ -174,7 +178,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         if(i_d == R.id.select_button){
 //            openGallery();
+
             openDialog();
+
         }
         else if (i_d == R.id.upload_button)
         {
@@ -236,7 +242,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         //Toast.makeText(MainActivity.this,"click on photo galary",Toast.LENGTH_LONG).show();
 //                        openGallery();
                         Intent i = new Intent(MainActivity.this,ImgActivity.class);
-                        i.putExtra("imgitem",image_list);
+//                        i.putParcelableArrayListExtra("imgitem",image_list);
+                        Bundle args = new Bundle();
+                        args.putSerializable("imgitem",(Serializable)image_list);
+                        i.putExtra("bundle",args);
                         startActivity(i);
                         break;
                     case 1:
@@ -247,10 +256,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         }
                         else
                         {
-                            Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                            Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                             startActivityForResult(cameraIntent, CAMERA_REQUEST);
                         }
                         break;
+                    default:
+                        throw new IllegalStateException("Unexpected value: " + which);
                 }
 
             }
